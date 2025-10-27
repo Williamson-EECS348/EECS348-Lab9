@@ -1,5 +1,10 @@
 #include <iostream>
 
+#include "matrix.h"
+#include "fileReader.h"
+
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    Matrix<float> mat = FileReader<float>::readMatrixFromFile("matrices.txt");
+
+    std::cout << mat << std::endl;
 }
