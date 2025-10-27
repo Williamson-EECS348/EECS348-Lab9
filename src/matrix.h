@@ -1,10 +1,14 @@
 #pragma once
+
 #include <cstddef>
 #include <vector>
 #include <iostream>
 
 template<class T>
 class Matrix {
+    typedef std::vector<T> row_t;
+    typedef std::vector<row_t> mat_t;
+
 public:
     Matrix(int _rows, int _cols)
       : rows(_rows),
@@ -20,7 +24,7 @@ public:
       : rows(init.size()),
         cols(init.begin()->size()),
         data(rows, std::vector<T>(cols)) {
-    
+
         size_t i = 0;
         for (const auto& row : init) {
             size_t j = 0;
@@ -109,8 +113,11 @@ public:
 
         Matrix result(rows, other.cols);
         for (size_t i = 0; i < rows; i++) {
-            for (size_t j = 0; j < cols; j++) {
-                result.data[i][j] = data[i][j] * other.data[i][j];
+            for (size_t j = 0; j < other.cols; j++) {
+                result.data[i][j] = T{};
+                for (size_t k = 0; k < cols; k++) {
+                    result.data[i][j] += data[i][k] * other.data[k][j];
+                }
             }
         }
         return result;
@@ -139,6 +146,18 @@ public:
         T sum = T{};
         for (size_t i = 0; i < rows; i++) {
             sum += data[i][i];
+        }
+        return sum;
+    }
+
+    // get secondary diagonal sum
+    T secondaryDiagonalSum() const {
+        if (rows != cols) {
+            throw std::invalid_argument("Secondary diagonal sum is only defined for square matrices.");
+        }
+        T sum = T{};
+        for (size_t i = 0; i < rows; i++) {
+            sum += data[i][cols - 1 - i];
         }
         return sum;
     }
@@ -204,10 +223,11 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix& m) {
         for (size_t i = 0; i < m.rows; i++) {
+            os << "|\t";
             for (size_t j = 0; j < m.cols; j++) {
-                os << m.data[i][j] << " ";
+                os << m.data[i][j] << "\t";
             }
-            os << "\n";
+            os << "|\n";
         }
         return os;
     }
@@ -215,6 +235,9 @@ public:
     // Getter methods for dimensions
     size_t getRows() const { return rows; }
     size_t getCols() const { return cols; }
+
+    bool inRowBounds(size_t row) const { return row < rows && row >= 0; }
+    bool inColBounds(size_t col) const { return col < cols && col >= 0; }
 
 private:
     size_t rows, cols;
