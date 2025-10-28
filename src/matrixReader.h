@@ -29,7 +29,12 @@ public:
     }
 
     Matrix<T> readMatrix() {
-        return read();
+        try {
+            return read();
+        } catch (const std::exception& e) {
+            std::cerr << "Error reading matrix from file: " << e.what() << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
     }
 
 private:
