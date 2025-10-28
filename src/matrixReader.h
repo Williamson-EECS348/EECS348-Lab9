@@ -58,7 +58,7 @@ public:
 private:
 
     /**
-     * 
+     * starts loading a file and finds the matrix size
      * @param filename const std::string&; path to the file containing matrix data
      */
     void load(const std::string& filename) {
@@ -67,32 +67,44 @@ private:
             throw std::runtime_error("Could not open file: " + filename); // if not we throw an error
         }
 
-        std::string line;
-        // get matrix sizes
-        std::getline(file, line);
-        N = std::stoul(line);
+        /*** get matrix sizes ***/
+        std::string line; // the string to hold each line as we read it
+        std::getline(file, line); // get the first line on the file since it holds the NxN size of the matrix
+        N = std::stoul(line); // convert the string to an `unsigned long` (aka a `size_t`) and store that in the member variable `N`
     }
 
+    /**
+     * Reads the next matrix from the file and gives back to the user the `Matrix<T>`
+     * with the new matrix data
+     * @return Matrix<T>; the (NxN) matrix that was read in from the file
+     */
     Matrix<T> read() {
-        Matrix<T> result(N, N);
+        Matrix<T> result(N, N); // the matrix to return
 
-        std::string line;
-        for (size_t i = 0; i < N; ++i) {
-            if (!std::getline(file, line)) {
+        std::string line; // the string to hold each line as we read it
+        for (size_t i = 0; i < N; i++) { // we assume input is valid and loop only enough for a square matrix (i.e. up to `N`)
+            // reads the file from where we last left it and gets the new line
+            if (!std::getline(file, line)) { // if the line is empty we throw an error
+                // we expect at least enough data to fill an NxN matrix so if we dont get that much data then we throw an error
                 throw std::runtime_error("Unexpected end of file while reading matrix data.");
             }
-            std::istringstream iss(line);
-            for (size_t j = 0; j < N; ++j) {
-                T value;
-                if (!(iss >> value)) {
+
+            // string stream to read out the line in the file as an input stream
+            std::istringstream iss(line); // automatically deliminates on white space and converts to `T`
+            for (size_t j = 0; j < N; j++) { // again, we assume we only need to loop enough for a square matrix
+                T value; // the value that we will assign to the matrix cell, we make it type `T` since that is also the type of the matrix
+                if (!(iss >> value)) { // read the next 'part' of the `stringstream` into value; if this fails we throw an error
+                    // if we cannot read the data into the `value` then there must be some error in the incomming data and we throw an error
                     throw std::runtime_error("Invalid matrix data format.");
                 }
-                result[i][j] = value;
+                result[i][j] = value; // assign the value we found to cell in the matrix
             }
         }
+        // return the result to the user, this is pretty expensive since its copying multiple vectors
+        // so it would be better to use something like a smart pointer (i.e. `unique_ptr`) but oh well
         return result;
     }
 
-    std::ifstream file;
-    size_t N;
+    std::ifstream file; // the file which holds the matrix
+    size_t N; // the size of the matrix
 };
