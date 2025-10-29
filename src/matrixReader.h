@@ -7,6 +7,7 @@
 #include <sstream> // needed for istringstream
 #include <string> // needed for std::string
 #include <stdexcept> // needed for exceptions
+#include <cstdlib> // needed for std::exit, EXIT_FAILURE
 
 #include <iostream> // for error output
 
